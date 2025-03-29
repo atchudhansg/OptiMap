@@ -14,7 +14,8 @@ add_executable(pPIMCompiler
     src/CostEstimator.cpp
     src/CompilerMemory.cpp
     src/MemoryMapper.cpp
-    src/LLVMFrontend.cpp       # ✅ Add this line
+    src/LLVMFrontend.cpp
+    src/HHESS.cpp
 )
 
 
