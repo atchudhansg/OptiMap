@@ -13,7 +13,10 @@ add_executable(pPIMCompiler
     src/StrategyGenerator.cpp
     src/CostEstimator.cpp
     src/CompilerMemory.cpp
+    src/MemoryMapper.cpp
+    src/LLVMFrontend.cpp       # ✅ Add this line
 )
+
 
 # Explicitly include headers from your project's "include" directory
 target_include_directories(pPIMCompiler PRIVATE include)

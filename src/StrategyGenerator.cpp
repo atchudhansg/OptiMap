@@ -1,4 +1,5 @@
 #include "StrategyGenerator.hpp"
+#include "IRInstruction.hpp"
 #include <iostream>
 
 StrategyGenerator::StrategyGenerator(int rowsA, int colsA, int colsB)
@@ -12,9 +13,8 @@ std::vector<IRInstruction> StrategyGenerator::generate(StrategyType type) const 
             for (int i = 0; i < M; ++i)
                 for (int j = 0; j < K; ++j)
                     for (int k = 0; k < N; ++k) {
-                        // Simplified dummy IR (actual memory mapping later)
-                        irList.emplace_back(IROpcode::PROG, 1);
-                        irList.emplace_back(IROpcode::EXE, 1, true, false, i*10 + j); // fake row address
+                        irList.emplace_back(OpType::PROG, 1, false, false, 0); // dummy
+                        irList.emplace_back(OpType::EXE, 1, true, false, i * 10 + j); // simulated row
                     }
             break;
 
@@ -22,8 +22,8 @@ std::vector<IRInstruction> StrategyGenerator::generate(StrategyType type) const 
             for (int i = 0; i < M; ++i)
                 for (int k = 0; k < N; ++k)
                     for (int j = 0; j < K; ++j) {
-                        irList.emplace_back(IROpcode::PROG, 1);
-                        irList.emplace_back(IROpcode::EXE, 1, true, false, i*10 + j);
+                        irList.emplace_back(OpType::PROG, 1, false, false, 0);
+                        irList.emplace_back(OpType::EXE, 1, true, false, i * 10 + j);
                     }
             break;
 
@@ -31,8 +31,8 @@ std::vector<IRInstruction> StrategyGenerator::generate(StrategyType type) const 
             for (int i = 0; i < M; i += 4)
                 for (int j = 0; j < K; j += 4)
                     for (int k = 0; k < N; k += 4) {
-                        irList.emplace_back(IROpcode::PROG, 2);
-                        irList.emplace_back(IROpcode::EXE, 2, true, false, i + j + k); // dummy
+                        irList.emplace_back(OpType::PROG, 2, false, false, 0);
+                        irList.emplace_back(OpType::EXE, 2, true, false, i + j + k);
                     }
             break;
     }

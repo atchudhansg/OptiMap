@@ -2,44 +2,30 @@
 #include <sstream>
 #include <iomanip>
 
-IRInstruction::IRInstruction(IROpcode op, uint8_t ptr, bool rd, bool wr, uint16_t row)
-    : opcode(op), pointer(ptr), read(rd), write(wr), row_addr(row) {}
+IRInstruction::IRInstruction(OpType op, int ptr, bool read, bool write, int row)
+    : op(op), ptr(ptr), read(read), write(write), row(row) {}
 
 std::string IRInstruction::toString() const {
     std::ostringstream oss;
-    oss << "[IR] Op: ";
-
-    switch (opcode) {
-        case IROpcode::NOOP: oss << "NOOP"; break;
-        case IROpcode::PROG: oss << "PROG"; break;
-        case IROpcode::EXE:  oss << "EXE";  break;
-        case IROpcode::END:  oss << "END";  break;
-    }
-
-    oss << ", Ptr: " << +pointer
+    oss << "[IR] Op: " << (op == OpType::PROG ? "PROG" : "EXE")
+        << ", Ptr: " << ptr
         << ", R: " << read
         << ", W: " << write
-        << ", Row: " << row_addr;
-
+        << ", Row: " << row;
     return oss.str();
 }
 
-uint32_t IRInstruction::encodeToISA() const {
-    uint32_t word = 0;
+unsigned int IRInstruction::encodeToISA() const {
+    unsigned int isa = 0;
+    isa |= (op == OpType::EXE) ? (1 << 23) : 0;     // Bit 23: EXE or PROG
+    isa |= (ptr & 0xF) << 19;                       // Bits 22–19: pointer
+    isa |= (read ? 1 : 0) << 18;                    // Bit 18: read
+    isa |= (write ? 1 : 0) << 17;                   // Bit 17: write
+    isa |= (row & 0x1FF);                           // Bits 8–0: row
+    return isa;
+}
 
-    uint8_t op_bits;
-    switch (opcode) {
-        case IROpcode::NOOP: op_bits = 0b00; break;
-        case IROpcode::PROG: op_bits = 0b01; break;
-        case IROpcode::EXE:  op_bits = 0b10; break;
-        case IROpcode::END:  op_bits = 0b11; break;
-    }
-
-    word |= (op_bits << 22);          // Opcode (2 bits)
-    word |= (pointer & 0x3F) << 16;   // Pointer (6 bits)
-    word |= (read ? 1 : 0) << 15;     // Read bit
-    word |= (write ? 1 : 0) << 14;    // Write bit
-    word |= (row_addr & 0x1FF);       // 9-bit row address
-
-    return word;
+// ✅ NEW
+int IRInstruction::getRow() const {
+    return encodeToISA() & 0x1FF; // Lower 9 bits
 }

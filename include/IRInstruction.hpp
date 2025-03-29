@@ -1,31 +1,25 @@
-#ifndef IRINSTRUCTION_HPP
-#define IRINSTRUCTION_HPP
+#ifndef IR_INSTRUCTION_HPP
+#define IR_INSTRUCTION_HPP
 
 #include <string>
-#include <cstdint>
 
-enum class IROpcode {
-    NOOP,
-    PROG,
-    EXE,
-    END
-};
+enum class OpType { PROG, EXE };
 
 class IRInstruction {
 public:
-    // Constructor
-    IRInstruction(IROpcode op, uint8_t pointer = 0, bool read = false, bool write = false, uint16_t row = 0);
+    OpType op;
+    int ptr;
+    bool read;
+    bool write;
+    int row;
 
-    // Methods
+    IRInstruction(OpType op, int ptr, bool read, bool write, int row);
+
+
     std::string toString() const;
-    uint32_t encodeToISA() const;
-
-private:
-    IROpcode opcode;
-    uint8_t pointer;     // Core/Read Pointer (6 bits)
-    bool read;           // 1 bit
-    bool write;          // 1 bit
-    uint16_t row_addr;   // 9 bits
+    unsigned int encodeToISA() const;
+    
+    int getRow() const;  // ✅ NEW
 };
 
-#endif // IRINSTRUCTION_HPP
+#endif
