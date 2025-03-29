@@ -8,5 +8,7 @@ add_executable(pPIMCompiler
     src/main.cpp
     src/IRInstruction.cpp
     src/StrategyGenerator.cpp
+    src/CostEstimator.cpp
 )
+
 target_include_directories(pPIMCompiler PRIVATE include)
