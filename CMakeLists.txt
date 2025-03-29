@@ -7,6 +7,6 @@ include_directories(include)
 add_executable(pPIMCompiler
     src/main.cpp
     src/IRInstruction.cpp
+    src/StrategyGenerator.cpp
 )
-
 target_include_directories(pPIMCompiler PRIVATE include)
