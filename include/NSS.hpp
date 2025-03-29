@@ -1,26 +1,33 @@
-#ifndef NSS_HPP
-#define NSS_HPP
+#pragma once
 
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include "MLPModel.hpp"
 
 class NSS {
 public:
-    // Construct from JSON directly (instead of from file path)
-    NSS(nlohmann::json& memory);
+    // Construct from JSON + specify how many input features for the MLP
+    NSS(nlohmann::json& memoryRef, size_t featureCount);
 
-    // Predict best permutation from candidates
-    std::string evolveAndSelect(const std::vector<std::string>& candidates, const std::string& fingerprint);
+    // Decide best strategy among candidates
+    std::string evolveAndSelect(const std::vector<std::string>& candidates,
+                                const std::string& fingerprint,
+                                const std::vector<int>& dims);
 
-    // Update cost/fingerprint memory
-    void updateFitness(const std::string& fingerprint, const std::string& chosenPerm, int cost);
+    // Update memory & train MLP with actual cost
+    void updateFitness(const std::string& fingerprint,
+                       const std::string& chosenStrategy,
+                       const std::vector<int>& dims,
+                       int cost);
 
-    // Export updated memory for saving
+    // Return the updated memory for saving
     nlohmann::json exportJSON() const;
 
 private:
     nlohmann::json memory;
-};
+    MLPModel model;  // the advanced MLP
 
-#endif // NSS_HPP
+    // Convert dimensions + strategy name => feature vector
+    std::vector<int> makeFeatures(const std::vector<int>& dims, const std::string& strategy) const;
+};

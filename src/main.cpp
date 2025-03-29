@@ -15,50 +15,71 @@
 #include <ctime>
 #include <sstream>
 
-// ✅ Use actual matrix dimensions for n matrix chain multiplication
+// ==================================================
+// Step 9: Main entry point using advanced MLP-based NSS
+// ==================================================
 int main() {
     std::cout << "\n========== LLVM IR Input Analysis ==========\n";
     LLVMFrontend::parseIRFile("../matrix_mul.ll");
 
-    // 🔢 Define chain dimensions (M0 x M1) * (M1 x M2) * ... * (Mn-1 x Mn)
-    std::vector<int> dimensions = {10, 5, 2, 3};  // Example: (10x5)*(5x2)*(2x3)
+    // 1) Define chain dimensions for a single chain:
+    //    e.g., (10x5)*(5x2)*(2x3)
+    std::vector<int> dimensions = {10, 5, 2, 3};  
+    // Build a "fingerprint" string like "10x5x2x3"
     std::string fingerprint;
     for (size_t i = 0; i < dimensions.size(); ++i) {
         fingerprint += std::to_string(dimensions[i]);
         if (i != dimensions.size() - 1) fingerprint += "x";
     }
 
-    // Only 1 valid order — original chain
+    // 2) In a more sophisticated setup, you'd have multiple chain permutations
+    //    or multiple strategies. For now, we just have a single "chain" as a fallback.
+    //    If you want to expand to multiple permutations or different loop orders,
+    //    define them here. Example:
     std::vector<std::string> validChains = {fingerprint};
 
-    // 🛡️ Load NSS memory safely
+    // 3) Load existing memory from JSON, or initialize if empty
     std::string memoryFile = "nss_memory.json";
     nlohmann::json memoryJson;
-    std::ifstream inFile(memoryFile);
-    if (inFile.peek() != std::ifstream::traits_type::eof()) {
-        inFile >> memoryJson;
-    } else {
-        std::cout << "⚠️  NSS memory file is empty. Initializing new JSON.\n";
-        memoryJson = nlohmann::json::object();
+    {
+        std::ifstream inFile(memoryFile);
+        if (inFile.peek() != std::ifstream::traits_type::eof()) {
+            inFile >> memoryJson;
+        } else {
+            std::cout << "⚠️  NSS memory file is empty. Initializing new JSON.\n";
+            memoryJson = nlohmann::json::object();
+        }
     }
-    inFile.close();
 
-    // 🧠 Evolve/select based on NSS memory
-    NSS neuroSelector(memoryJson);
-    std::string chosenChain = neuroSelector.evolveAndSelect(validChains, fingerprint);
+    // 4) Create the advanced NSS object with MLP
+    //    The MLP expects #features = (number_of_dimensions + 1) 
+    //    because we typically add a "strategy ID" as an extra feature.
+    //    Since we currently have only 1 chain, this is minimal. 
+    //    But let's keep it consistent with the advanced approach.
+    size_t featureCount = dimensions.size() + 1; 
+    NSS neuroSelector(memoryJson, featureCount);
+
+    // 5) Let NSS pick (or predict) the best chain from validChains
+    //    Note that in the advanced pipeline, the signature is:
+    //      evolveAndSelect(const std::vector<std::string>&, 
+    //                      const std::string& fingerprint,
+    //                      const std::vector<int>& dims)
+    std::string chosenChain = neuroSelector.evolveAndSelect(validChains, fingerprint, dimensions);
     std::cout << "\n✅ Selected Matrix Chain: " << chosenChain << "\n";
 
-    // 🔁 Convert string back to vector<int>
+    // 6) Convert the chosen chain back into dimension vector
     std::vector<int> shape;
-    std::stringstream ss(chosenChain);
-    std::string token;
-    while (std::getline(ss, token, 'x')) {
-        shape.push_back(std::stoi(token));
+    {
+        std::stringstream ss(chosenChain);
+        std::string token;
+        while (std::getline(ss, token, 'x')) {
+            shape.push_back(std::stoi(token));
+        }
     }
 
-    // ⚙️ IR Generation for given matrix chain
+    // 7) IR Generation for the chosen matrix chain
     StrategyGenerator gen(chosenChain, shape);
-    auto irList = gen.generate();
+    auto irList = gen.generate();  // The generator returns a list of IR instructions
 
     std::cout << "\n📦 Generated IR:\n";
     MemoryMapper memoryMapper;
@@ -72,17 +93,22 @@ int main() {
         std::cout << "    ↳ " << mapping << "\n";
     }
 
-    // 💰 Cost Estimation
+    // 8) Cost Estimation (this is the actual cost of the chosen strategy)
     CostEstimator estimator;
     int cost = estimator.estimateCost(irList);
     std::cout << "Estimated Cost: " << cost << "\n";
 
-    // 💾 Update NSS memory and write to disk
-    neuroSelector.updateFitness(fingerprint, chosenChain, cost);
+    // 9) Update NSS memory & the MLP model with real cost
+    //    The advanced method signature is:
+    //      updateFitness(const std::string&, const std::string&, 
+    //                    const std::vector<int>&, int)
+    neuroSelector.updateFitness(fingerprint, chosenChain, shape, cost);
 
-    std::ofstream outFile(memoryFile);
-    outFile << neuroSelector.exportJSON().dump(4);
-    outFile.close();
+    // 10) Save updated memory to disk
+    {
+        std::ofstream outFile(memoryFile);
+        outFile << neuroSelector.exportJSON().dump(4);
+    }
 
     return 0;
 }

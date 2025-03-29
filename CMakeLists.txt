@@ -3,10 +3,10 @@ project(pPIMCompiler)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Include path corrected to point directly to the nested include directory
+# 1) Include path for the nlohmann JSON if needed:
 include_directories(include/nlohmann/json/include)
 
-# Add your executable
+# 2) Add your executable and list only the .cpp files that actually exist:
 add_executable(pPIMCompiler
     src/main.cpp
     src/IRInstruction.cpp
@@ -17,9 +17,9 @@ add_executable(pPIMCompiler
     src/LLVMFrontend.cpp
     src/HHESS.cpp
     src/NSS.cpp
-
+    # Remove or comment out src/MLModel.cpp if it doesn't exist
+    src/MLPModel.cpp
 )
 
-
-# Explicitly include headers from your project's "include" directory
+# 3) Explicitly add your "include" directory to the target's include paths
 target_include_directories(pPIMCompiler PRIVATE include)
