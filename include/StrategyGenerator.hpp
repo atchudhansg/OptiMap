@@ -5,21 +5,16 @@
 #include <vector>
 #include <string>
 
-enum class StrategyType {
-    IJK,
-    IKJ,
-    TILED_4x4
-};
-
 class StrategyGenerator {
 public:
-    StrategyGenerator(int rowsA, int colsA, int colsB);
+    StrategyGenerator(const std::string& strategyName, const std::vector<int>& dims);
 
-    std::vector<IRInstruction> generate(StrategyType type) const;
-    std::string strategyName(StrategyType type) const;
+    std::vector<IRInstruction> generate() const;
+    std::string getName() const;
 
 private:
-    int M, N, K; // Matrix dimensions
+    std::string name;
+    std::vector<int> shape;  // e.g., {6, 6, 6}
 };
 
 #endif // STRATEGY_GENERATOR_HPP

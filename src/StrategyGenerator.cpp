@@ -1,50 +1,41 @@
 #include "StrategyGenerator.hpp"
-#include "IRInstruction.hpp"
 #include <iostream>
+#include <sstream>
 
-StrategyGenerator::StrategyGenerator(int rowsA, int colsA, int colsB)
-    : M(rowsA), N(colsA), K(colsB) {}
+StrategyGenerator::StrategyGenerator(const std::string& strategyName, const std::vector<int>& dims)
+    : name(strategyName), shape(dims) {}
 
-std::vector<IRInstruction> StrategyGenerator::generate(StrategyType type) const {
-    std::vector<IRInstruction> irList;
-
-    switch (type) {
-        case StrategyType::IJK:
-            for (int i = 0; i < M; ++i)
-                for (int j = 0; j < K; ++j)
-                    for (int k = 0; k < N; ++k) {
-                        irList.emplace_back(OpType::PROG, 1, false, false, 0); // dummy
-                        irList.emplace_back(OpType::EXE, 1, true, false, i * 10 + j); // simulated row
-                    }
-            break;
-
-        case StrategyType::IKJ:
-            for (int i = 0; i < M; ++i)
-                for (int k = 0; k < N; ++k)
-                    for (int j = 0; j < K; ++j) {
-                        irList.emplace_back(OpType::PROG, 1, false, false, 0);
-                        irList.emplace_back(OpType::EXE, 1, true, false, i * 10 + j);
-                    }
-            break;
-
-        case StrategyType::TILED_4x4:
-            for (int i = 0; i < M; i += 4)
-                for (int j = 0; j < K; j += 4)
-                    for (int k = 0; k < N; k += 4) {
-                        irList.emplace_back(OpType::PROG, 2, false, false, 0);
-                        irList.emplace_back(OpType::EXE, 2, true, false, i + j + k);
-                    }
-            break;
-    }
-
-    return irList;
+std::string StrategyGenerator::getName() const {
+    return name;
 }
 
-std::string StrategyGenerator::strategyName(StrategyType type) const {
-    switch (type) {
-        case StrategyType::IJK: return "ijk";
-        case StrategyType::IKJ: return "ikj";
-        case StrategyType::TILED_4x4: return "tiled_4x4";
-        default: return "unknown";
-    }
+std::vector<IRInstruction> StrategyGenerator::generate() const {
+    std::vector<IRInstruction> irList;
+
+    // Example logic: Each element in shape represents a dimension
+    // We'll create a nested loop for each dimension
+    // For now: generate 2 ops (PROG, EXE) per inner-most loop iteration
+
+    std::function<void(std::vector<int>&, int)> recursiveEmit =
+        [&](std::vector<int>& indices, int dim) {
+            if (dim == shape.size()) {
+                // Simulated offset = sum of indices (for uniqueness)
+                int offset = 0;
+                for (int v : indices) offset += v;
+
+                irList.emplace_back(OpType::PROG, shape.size(), false, false, 0);
+                irList.emplace_back(OpType::EXE, shape.size(), true, false, offset);
+                return;
+            }
+
+            for (int i = 0; i < shape[dim]; ++i) {
+                indices[dim] = i;
+                recursiveEmit(indices, dim + 1);
+            }
+        };
+
+    std::vector<int> indexTrack(shape.size(), 0);
+    recursiveEmit(indexTrack, 0);
+
+    return irList;
 }

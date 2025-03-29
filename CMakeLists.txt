@@ -16,6 +16,8 @@ add_executable(pPIMCompiler
     src/MemoryMapper.cpp
     src/LLVMFrontend.cpp
     src/HHESS.cpp
+    src/NSS.cpp
+
 )
 
 
