@@ -1,0 +1,41 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Build directories (CMake)
+build/
+cmake-build-*/          # JetBrains CLion & other IDEs
+
+# Compiled object files
+*.o
+*.obj
+*.lo
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+
+# Executables
+*.out
+*.exe
+pPIMCompiler
+
+# Logs and test output
+logs/
+*.log
+
+# Backup/swap files
+*~
+*.swp
+*.tmp
+*.bak
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# JSON history, temp dumps (optional)
+*.json
+*.dump
