@@ -23,8 +23,8 @@ cmake-build-*/          # JetBrains CLion & other IDEs
 pPIMCompiler
 
 # Logs and test output
-logs/
-*.log
+logs/*
+!.gitkeep
 
 # Backup/swap files
 *~
