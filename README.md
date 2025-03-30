@@ -22,7 +22,7 @@ It also incorporates **hardware-aware memory mapping**, making it highly suitabl
 ## 📂 Repository Structure
 
 ```
-pPIMCompiler/
+OptiMap/
  ├── data/                     # JSON memory store (compiler_memory.json, nss_memory.json)
  ├── include/                  # Header files (IR, strategy, NSS, cost model, etc.)
  ├── logs/                     # Debug logs (ISA traces)
