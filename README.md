@@ -118,7 +118,7 @@ From the project root directory:
 cd build
 cmake ..
 make
-./pPIMCompiler
+./OptiMap
 ```
 
 This will compile the project and execute the main pipeline, including LLVM IR parsing, strategy selection, and 24-bit ISA code generation.
